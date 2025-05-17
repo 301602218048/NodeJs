@@ -5,13 +5,17 @@ const server = http.createServer((req, res) => {
   res.setHeader("Content-Type", "text/html");
 
   if (req.url == "/") {
-    res.end(`
+    fs.readFile("formValues.txt", (err, data) => {
+      const savedData = data ? data.toString() : "No data yet";
+      res.end(`
+          <h2>${savedData}</h2>
           <form action="/message" method="POST">
             <label>Name: </label>
             <input type="text" name="username" />
             <button type="submit">Add</button>
           </form>
         `);
+    });
   } else {
     if (req.url == "/message") {
       res.setHeader("Content-Type", "text/html");
