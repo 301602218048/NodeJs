@@ -1,16 +1,10 @@
 const express = require("express");
-const category = require("./routes/category");
-const product = require("./routes/product");
+const book = require("./routes/book");
 
 const app = express();
 
-app.use((req, res, next) => {
-  console.log(req.method, "request made to", req.url);
-  next();
-});
-
-app.use("/categories", category);
-app.use("/products", product);
+app.use(express.json());
+app.use("/books", book);
 
 const port = 4000;
 app.listen(port, () => {
