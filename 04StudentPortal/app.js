@@ -8,7 +8,7 @@ const app = express();
 
 app.use(express.json());
 app.use("/", home);
-app.use("/users", user.router);
+app.use("/users", user);
 app.use("/products", product);
 app.use("/carts", cart);
 app.use((req, res) => {
