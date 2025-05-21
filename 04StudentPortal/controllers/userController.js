@@ -1,32 +1,43 @@
-const users = [];
+const userService = require("../services/userService");
+const { sendErrorResponse, sendResponse } = require("../utils/response");
 
 const fetchUser = (req, res) => {
+  const users = userService.getAllUsers();
   if (users.length > 0) {
     console.log(users);
-    res.send("Fetching all users");
+    return sendResponse(res, "Fetching all users", 200);
   } else {
-    res.send("No user in userList");
+    return sendErrorResponse(res, {
+      message: "No user in userList",
+      statusCode: 404,
+    });
   }
 };
 
 const fetchUserById = (req, res) => {
-  const id = req.params.id;
-  if (id <= users.length) {
-    const user = users[id - 1];
+  const id = parseInt(req.params.id);
+  const user = userService.getUserById(id);
+  if (user) {
     console.log(user);
-    res.send(`Fetching user with ID: ${id}`);
+    return sendResponse(res, `Fetching user with ID: ${id}`, 200);
   } else {
-    res.send("User not found");
+    return sendErrorResponse(res, {
+      message: "User not found",
+      statusCode: 404,
+    });
   }
 };
 
 const addUser = (req, res) => {
-  const obj = {
-    id: users.length + 1,
-    name: req.body.name,
-  };
-  users.push(obj);
-  res.send("Adding a new user");
+  const name = req.body.name;
+  if (!name) {
+    return sendErrorResponse(res, {
+      message: "User name is required",
+      statusCode: 400,
+    });
+  }
+  const user = userService.addUser(name);
+  return sendResponse(res, `Added new user: ${user.name}`, 200);
 };
 
-module.exports = { fetchUser, fetchUserById, addUser, users };
+module.exports = { fetchUser, fetchUserById, addUser };

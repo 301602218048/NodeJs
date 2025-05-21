@@ -1,32 +1,51 @@
-const u = require("./userController");
-const carts = [];
+const userService = require("../services/userService");
+const cartService = require("../services/cartService");
+const { sendErrorResponse, sendResponse } = require("../utils/response");
 
 const fetchCart = (req, res) => {
-  const id = req.params.userid;
-  if (id <= carts.length) {
-    const items = carts[id - 1].product;
-    console.log(items);
-    res.send(`Fetching cart for user with ID: ${id}`);
+  const id = parseInt(req.params.userid);
+  const items = cartService.getCartById(id);
+  if (items) {
+    console.log(items.product);
+    return sendResponse(res, `Fetching cart for user with ID: ${id}`, 200);
   } else {
-    res.send("Cart not found");
+    return sendErrorResponse(res, {
+      message: "Cart not found",
+      statusCode: 404,
+    });
   }
 };
 
 const addToCart = (req, res) => {
-  const id = req.params.userid;
-  if (id <= carts.length) {
-    const product = req.body.product;
-    carts[id - 1].product.push(product);
-    res.send(`Adding product to cart for user with ID: ${id}`);
-  } else if (id <= u.users.length) {
-    const obj = {
-      id,
-      product: [req.body.product],
-    };
-    carts.push(obj);
-    res.send(`Adding product to cart for user with ID: ${id}`);
+  const id = parseInt(req.params.userid);
+  const item = cartService.getCartById(id);
+  const user = userService.getUserById(id);
+  const prod = req.body.product;
+  if (!prod) {
+    return sendErrorResponse(res, {
+      message: "Product name is required",
+      statusCode: 400,
+    });
+  }
+  if (item) {
+    item.product.push(prod);
+    return sendResponse(
+      res,
+      `Adding product to cart for user with ID: ${id}`,
+      200
+    );
+  } else if (user) {
+    const productName = cartService.addToCart(prod);
+    return sendResponse(
+      res,
+      `Adding ${productName.product} to cart for user with ID: ${id}`,
+      200
+    );
   } else {
-    res.send("Cart not found");
+    return sendErrorResponse(res, {
+      message: "Cart not found",
+      statusCode: 404,
+    });
   }
 };
 

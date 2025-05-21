@@ -1,12 +1,16 @@
 const productService = require("../services/productService");
+const { sendErrorResponse, sendResponse } = require("../utils/response");
 
 const fetchProduct = (req, res) => {
   const products = productService.getAllProducts();
   if (products.length > 0) {
     console.log(products);
-    res.send("Fetching all products");
+    return sendResponse(res, "Fetching all products", 200);
   } else {
-    res.send("No product in productList");
+    return sendErrorResponse(res, {
+      message: "No product in productList",
+      statusCode: 404,
+    });
   }
 };
 
@@ -15,19 +19,25 @@ const fetchProductById = (req, res) => {
   const product = productService.getProductById(id);
   if (product) {
     console.log(product);
-    res.send(`Fetching product with ID: ${id}`);
+    return sendResponse(res, `Fetching product with ID: ${id}`, 200);
   } else {
-    res.send("Product not found");
+    return sendErrorResponse(res, {
+      message: "Product not found",
+      statusCode: 404,
+    });
   }
 };
 
 const addProduct = (req, res) => {
   const name = req.body.name;
   if (!name) {
-    return res.status(400).send("Product name is required");
+    return sendErrorResponse(res, {
+      message: "Product name is required",
+      statusCode: 400,
+    });
   }
   const product = productService.addProduct(name);
-  res.send(`Added new product: ${product.name}`);
+  return sendResponse(res, `Added new product: ${product.name}`, 200);
 };
 
 module.exports = { fetchProduct, fetchProductById, addProduct };
