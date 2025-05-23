@@ -17,19 +17,68 @@ connection.connect((err) => {
   }
   console.log("Database connection has been established");
 
-  const creationQuery = `create table Students(
+  //create user table
+  const userCreationQuery = `create table Users(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(20),
-    email VARCHAR(20)
+    name VARCHAR(255),
+    email VARCHAR(255)
   )`;
 
-  connection.execute(creationQuery, (err) => {
+  connection.execute(userCreationQuery, (err) => {
     if (err) {
       console.log(err);
       connection.end();
       return;
     }
-    console.log("Table is created");
+    console.log("Users table created");
+  });
+
+  //create buses table
+  const busCreationQuery = `create table Buses(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    busNumber VARCHAR(25),
+    totalSeats INT,
+    availableSeats INT
+  )`;
+
+  connection.execute(busCreationQuery, (err) => {
+    if (err) {
+      console.log(err);
+      connection.end();
+      return;
+    }
+    console.log("Buses table created");
+  });
+
+  //create bookings table
+  const bookingCreationQuery = `create table Bookings(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    seatNumber INT
+  )`;
+
+  connection.execute(bookingCreationQuery, (err) => {
+    if (err) {
+      console.log(err);
+      connection.end();
+      return;
+    }
+    console.log("Bookings table created");
+  });
+
+  //create payments table
+  const paymentCreationQuery = `create table Payments(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    amountPaid INT,
+    paymentStatus VARCHAR(255)
+  )`;
+
+  connection.execute(paymentCreationQuery, (err) => {
+    if (err) {
+      console.log(err);
+      connection.end();
+      return;
+    }
+    console.log("Payments table created");
   });
 });
 
