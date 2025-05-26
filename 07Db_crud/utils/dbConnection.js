@@ -1,36 +1,54 @@
-const mysql = require("mysql2");
+const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-const connection = mysql.createConnection({
+const sequelize = new Sequelize("testdb", "root", process.env.DATABASE_PSWD, {
   host: "localhost",
-  user: "root",
-  password: process.env.DATABASE_PSWD,
-  database: "testdb",
+  dialect: "mysql",
 });
 
-connection.connect((err) => {
-  if (err) {
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("connection to database has been created");
+  } catch (err) {
     console.log(err);
-    return;
   }
-  console.log("Database connection has been established");
+})();
 
-  //create students table
-  const userCreationQuery = `create table IF NOT EXISTS Students(
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255),
-      email VARCHAR(255) UNIQUE,
-      age INT
-    )`;
+module.exports = sequelize;
 
-  connection.execute(userCreationQuery, (err) => {
-    if (err) {
-      console.log(err);
-      connection.end();
-      return;
-    }
-    console.log("Students table created");
-  });
-});
+// const mysql = require("mysql2");
 
-module.exports = connection;
+// const connection = mysql.createConnection({
+//   host: "localhost",
+//   user: "root",
+//   password: process.env.DATABASE_PSWD,
+//   database: "testdb",
+// });
+
+// connection.connect((err) => {
+//   if (err) {
+//     console.log(err);
+//     return;
+//   }
+//   console.log("Database connection has been established");
+
+//   //create students table
+//   const userCreationQuery = `create table IF NOT EXISTS Students(
+//       id INT AUTO_INCREMENT PRIMARY KEY,
+//       name VARCHAR(255),
+//       email VARCHAR(255) UNIQUE,
+//       age INT
+//     )`;
+
+//   connection.execute(userCreationQuery, (err) => {
+//     if (err) {
+//       console.log(err);
+//       connection.end();
+//       return;
+//     }
+//     console.log("Students table created");
+//   });
+// });
+
+// module.exports = connection;
