@@ -12,6 +12,12 @@ app.get("/", (req, res) => {
   res.send("hello world");
 });
 
-app.listen(3000, () => {
-  console.log("server running...");
-});
+db.sync({ force: false })
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("server running...");
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });

@@ -1,83 +1,18 @@
-const mysql = require("mysql2");
+const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-const connection = mysql.createConnection({
+const sequelize = new Sequelize("testdb", "root", process.env.DATABASE_PSWD, {
   host: "localhost",
-  user: "root",
-  password: process.env.DATABASE_PSWD,
-  database: "testdb",
+  dialect: "mysql",
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.log(err);
-    return;
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Connection to database established");
+  } catch (error) {
+    console.log(error);
   }
-  console.log("Database connection has been established");
+})();
 
-  //create user table
-  const userCreationQuery = `create table IF NOT EXISTS Users(
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255),
-      email VARCHAR(255)
-    )`;
-
-  connection.execute(userCreationQuery, (err) => {
-    if (err) {
-      console.log(err);
-      connection.end();
-      return;
-    }
-    console.log("Users table created");
-  });
-
-  //create buses table
-  const busCreationQuery = `create table IF NOT EXISTS Buses(
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      busNumber VARCHAR(25),
-      totalSeats INT,
-      availableSeats INT
-    )`;
-
-  connection.execute(busCreationQuery, (err) => {
-    if (err) {
-      console.log(err);
-      connection.end();
-      return;
-    }
-    console.log("Buses table created");
-  });
-
-  //create bookings table
-  const bookingCreationQuery = `create table IF NOT EXISTS Bookings(
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      seatNumber INT
-    )`;
-
-  connection.execute(bookingCreationQuery, (err) => {
-    if (err) {
-      console.log(err);
-      connection.end();
-      return;
-    }
-    console.log("Bookings table created");
-  });
-
-  //create payments table
-  const paymentCreationQuery = `create table IF NOT EXISTS Payments(
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      amountPaid INT,
-      paymentStatus VARCHAR(255)
-    )`;
-
-  connection.execute(paymentCreationQuery, (err) => {
-    if (err) {
-      console.log(err);
-      connection.end();
-      return;
-    }
-    console.log("Payments table created");
-  });
-});
-
-module.exports = connection;
+module.exports = sequelize;

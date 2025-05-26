@@ -1,33 +1,28 @@
-const db = require("../utils/db-connection");
+const User = require("../models/user");
 
-const addUser = (req, res) => {
-  const { name, email } = req.body;
-  const insertQuery = "insert into Users (name,email) values (?,?)";
-  db.execute(insertQuery, [name, email], (err) => {
-    if (err) {
-      console.log(err.message);
-      res.status(500).send(err.message);
-      db.end();
-      return;
-    }
-    console.log("value added to users table");
-    res.status(200).send(`User with name ${name} has been added`);
-  });
+const addUser = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const user = await User.create({
+      name: name,
+      email: email,
+    });
+    res.status(200).send(`Student with name ${name} is successfully added`);
+  } catch (error) {
+    res.status(500).send("Error encountered while adding user");
+  }
 };
 
-const getAllUser = (req, res) => {
-  const searchQuery = "select * from Users";
-  db.execute(searchQuery, (err, result) => {
-    console.log(result);
-    if (err) {
-      console.log(err.message);
-      res.status(500).send(err.message);
-      db.end();
-      return;
+const getAllUser = async (req, res) => {
+  try {
+    const user = await User.findAll();
+    if (!user) {
+      res.status(404).send("User not found");
     }
-    const userList = result.map((r) => r.name);
-    res.status(200).send(`Here is the list of Users - ${userList}`);
-  });
+    res.status(200).send(user);
+  } catch (error) {
+    res.status(500).send("Error encountered while fetching users");
+  }
 };
 
 module.exports = {
