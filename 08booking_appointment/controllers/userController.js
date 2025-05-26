@@ -25,12 +25,13 @@ const getAllUser = async (req, res) => {
       res.status(404).json({ msg: "No user in database" });
       return;
     }
-    res.status(200).send({
+    res.status(200).json({
       msg: "Here is the list of all users",
       data: user,
     });
   } catch (error) {
-    res.status(500).send({ msg: "Error encountered while fetching users" });
+    console.log(error);
+    res.status(500).json({ msg: "Error encountered while fetching users" });
   }
 };
 
@@ -39,12 +40,13 @@ const deleteUser = async (req, res) => {
     const id = req.params.id;
     const user = await User.destroy({ where: { id: id } });
     if (!user) {
-      res.status(404).send({ msg: "user not found" });
+      res.status(404).json({ msg: "user not found" });
       return;
     }
-    res.status(200).send({ msg: `User with id ${id} has been deleted` });
+    res.status(200).json({ msg: `User with id ${id} has been deleted` });
   } catch (error) {
-    res.status(500).send({ msg: "Error encountered while deleting user" });
+    console.log(error);
+    res.status(500).json({ msg: "Error encountered while deleting user" });
   }
 };
 
