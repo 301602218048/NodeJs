@@ -17,7 +17,7 @@ async function initialize() {
 function addToDOM(expense) {
   const ul = document.querySelector("ul");
   const li = document.createElement("li");
-  // li.setAttribute("user-id", user.id);
+  li.setAttribute("expense-id", expense.id);
   li.textContent =
     "Rs " +
     expense.amount +
@@ -43,27 +43,23 @@ function addToDOM(expense) {
 
 function handleForm(e) {
   e.preventDefault();
+  const obj = {
+    amount: e.target.amount.value,
+    category: e.target.category.value,
+    desc: e.target.desc.value,
+  };
 
-  const amount = e.target.amount.value;
-  const category = e.target.category.value;
-  const desc = e.target.desc.value;
-
-  // const editId = sessionStorage.getItem("edit-id");
-  // if (editId) {
-  //   update(editId, amount, category, desc);
-  // } else {
-  // }
-  addData(amount, category, desc);
+  const editId = sessionStorage.getItem("expense-id");
+  if (editId) {
+    update(editId, obj);
+  } else {
+    addData(obj);
+  }
   e.target.reset();
 }
 
-async function addData(amount, category, desc) {
+async function addData(obj) {
   try {
-    const obj = {
-      amount,
-      category,
-      desc,
-    };
     const expense = await axios.post("http://localhost:3000/expenses", obj);
     console.log(expense.data.data);
     addToDOM(expense.data.data);
@@ -77,39 +73,56 @@ async function deleteData(id, item) {
     const expense = await axios.delete(`http://localhost:3000/expenses/${id}`);
     console.log(expense.data);
     item.remove();
+    if (sessionStorage.getItem("expense-id"))
+      sessionStorage.removeItem("expense-id");
   } catch (error) {
     console.log(error);
   }
 }
 
-// function editData(userId) {
-//   const usersList = JSON.parse(localStorage.getItem("usersList")) || [];
-//   const user = usersList.find((u) => u.id === userId);
-//   if (user) {
-//     const form = document.querySelector("form");
-//     form.amount.value = user.amount;
-//     form.category.value = user.category;
-//     form.desc.value = user.desc;
-//     sessionStorage.setItem("edit-id", userId);
-//   }
-// }
+async function editData(expenseId) {
+  try {
+    const expense = await axios.get(
+      `http://localhost:3000/expenses/${expenseId}`
+    );
+    if (expense.data.data) {
+      const form = document.querySelector("form");
+      form.amount.value = expense.data.data.amount;
+      form.category.value = expense.data.data.category;
+      form.desc.value = expense.data.data.description;
+      sessionStorage.setItem("expense-id", expenseId);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 
-// function update(editId, amount, category, desc) {
-//   const usersList = JSON.parse(localStorage.getItem("usersList")) || [];
-//   const newUserList = usersList.map((user) => {
-//     if (user.id === editId) {
-//       return { ...user, amount, category, desc };
-//     } else return user;
-//   });
-//   localStorage.setItem("usersList", JSON.stringify(newUserList));
-//   sessionStorage.removeItem("edit-id");
+async function update(expenseId, obj) {
+  try {
+    const expense = await axios.put(
+      `http://localhost:3000/expenses/${expenseId}`,
+      obj
+    );
+    console.log(expense);
+    const expenseData = expense.data.data;
+    if (expenseData) {
+      sessionStorage.removeItem("expense-id");
 
-//   const liAll = document.querySelectorAll("li");
-//   liAll.forEach((li) => {
-//     const Id = li.getAttribute("user-id");
-//     if (Id === editId) {
-//       li.firstChild.textContent =
-//         "Rs " + amount + " - " + category + " - " + desc;
-//     }
-//   });
-// }
+      const liAll = document.querySelectorAll("li");
+      liAll.forEach((li) => {
+        const Id = li.getAttribute("expense-id");
+        if (Id === expenseId) {
+          li.firstChild.textContent =
+            "Rs " +
+            expenseData.amount +
+            " - " +
+            expenseData.category +
+            " - " +
+            expenseData.description;
+        }
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
