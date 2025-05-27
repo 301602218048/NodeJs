@@ -1,6 +1,33 @@
 const Department = require("../models/department");
 const Student = require("../models/students");
 
+const getAllStudents = async (req, res) => {
+  try {
+    const student = await Student.findAll();
+    if (student.length == 0) {
+      res.status(404).json({ msg: "No student in database" });
+    }
+    res.status(200).json(student);
+  } catch (error) {
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+const addStudent = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const student = await Student.create({
+      name: name,
+      email: email,
+    });
+    res
+      .status(201)
+      .json({ msg: `Student with name ${name} is successfully added` });
+  } catch (error) {
+    res.status(500).json({ msg: "Unable to make an entry" });
+  }
+};
+
 const addValuesToStudentAndDepartmentTable = async (req, res) => {
   try {
     const { departmentName, studentName, studentEmail } = req.body;
@@ -17,7 +44,7 @@ const addValuesToStudentAndDepartmentTable = async (req, res) => {
       DepartmentId: department.id,
     });
 
-    res.status(200).json({
+    res.status(201).json({
       message: "Student and Department added successfully",
       department,
       student,
@@ -56,6 +83,8 @@ const getValuesFromStudentAndDepartmentTable = async (req, res) => {
 };
 
 module.exports = {
+  getAllStudents,
+  addStudent,
   addValuesToStudentAndDepartmentTable,
   getValuesFromStudentAndDepartmentTable,
 };
