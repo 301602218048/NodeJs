@@ -1,4 +1,5 @@
 const Users = require("../models/user");
+const Buses = require("../models/bus");
 const Bookings = require("../models/booking");
 
 const addUser = async (req, res) => {
@@ -30,7 +31,12 @@ const getAllUser = async (req, res) => {
 const getBookingsofUserById = async (req, res) => {
   try {
     const id = req.params.id;
-    const booking = await Bookings.findByPk(id, { include: Users });
+    const booking = await Bookings.findAll({
+      where: {
+        UserId: id,
+      },
+      include: Buses,
+    });
     if (!booking) {
       res.status(404).json({ msg: "Booking not found" });
       return;
