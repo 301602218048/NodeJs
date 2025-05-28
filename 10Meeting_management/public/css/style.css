@@ -1,0 +1,66 @@
+.slot {
+  border: 1px solid #888;
+  padding: 10px;
+  margin: 5px;
+  width: 150px;
+  cursor: pointer;
+  display: inline-block;
+}
+.form-container,
+.meeting-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+}
+#form-section {
+  display: none;
+}
+.full {
+  color: red;
+}
+.meeting-card {
+  position: relative;
+  background: #f9f9f9;
+}
+.cancel-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+
+/* 
+body {
+  margin: 0;
+  padding: 0;
+  background-color: lightblue;
+}
+form {
+  background-color: aquamarine;
+  padding: 10px;
+}
+li {
+  font-size: 16px;
+  padding: 5px;
+  margin: 10px;
+  border-radius: 5px;
+  background-color: lightyellow;
+  justify-content: space-between;
+  display: flex;
+  align-items: flex-start;
+}
+ul {
+  list-style-type: none;
+  background-color: pink;
+  padding: 5px;
+  margin: 0 30px;
+  width: 50%;
+  border-radius: 5px;
+}
+button {
+  margin-inline-end: 10px;
+} */
