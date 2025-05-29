@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>General Store</title>
+  </head>
+  <body>
+    <div>
+      <form id="itemForm" onsubmit="handleForm(event)">
+        <div>
+          <label for="itemName">Item Name</label>
+          <input
+            type="text"
+            name="itemName"
+            id="itemName"
+            placeholder="Enter Item Name"
+            required
+          />
+        </div>
+        <div>
+          <label for="description">Description</label>
+          <input
+            type="text"
+            name="description"
+            id="description"
+            placeholder="Enter Description"
+            required
+          />
+        </div>
+        <div>
+          <label for="price">Price</label>
+          <input
+            type="number"
+            name="price"
+            id="price"
+            min="0"
+            placeholder="0"
+            required
+          />
+        </div>
+        <div>
+          <label for="quantity">Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            id="quantity"
+            min="1"
+            placeholder="1"
+            required
+          />
+        </div>
+        <button type="submit">Add Item</button>
+      </form>
+    </div>
+    <div>
+      <h2>ALL ITEMS</h2>
+      <ul></ul>
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+  <script src="/js/index.js"></script>
+</html>
