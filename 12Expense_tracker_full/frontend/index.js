@@ -17,5 +17,14 @@ async function addData(obj) {
     console.log(user.data.data);
   } catch (error) {
     console.log(error);
+    updateDOM(error.response);
   }
+}
+
+function updateDOM(user) {
+  const msg = document.getElementById("message");
+  const para = document.createElement("p");
+  para.textContent = `Error: ${user.data.msg}`;
+  para.style.color = "red";
+  msg.appendChild(para);
 }
