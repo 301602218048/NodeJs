@@ -1,7 +1,9 @@
-const api = "http://localhost:3000/user/signup";
+const api = "http://localhost:3000/user";
+const msg = document.getElementById("message");
 
-function handleForm(e) {
+function handleSignUp(e) {
   e.preventDefault();
+  msg.innerHTML = "";
   const obj = {
     name: e.target.name.value,
     email: e.target.email.value,
@@ -11,9 +13,33 @@ function handleForm(e) {
   e.target.reset();
 }
 
+function handleLogin(e) {
+  e.preventDefault();
+  msg.innerHTML = "";
+  const obj = {
+    email: e.target.email.value,
+    password: e.target.password.value,
+  };
+  userLogin(obj);
+  e.target.reset();
+}
+
+async function userLogin(obj) {
+  try {
+    const user = await axios.post(api + "/login", obj);
+    if (user) {
+      alert(`${user.data.msg}`);
+    }
+    console.log(user.data.data);
+  } catch (error) {
+    console.log(error);
+    updateDOM(error.response);
+  }
+}
+
 async function addData(obj) {
   try {
-    const user = await axios.post(api, obj);
+    const user = await axios.post(api + "/signup", obj);
     console.log(user.data.data);
   } catch (error) {
     console.log(error);
@@ -22,7 +48,6 @@ async function addData(obj) {
 }
 
 function updateDOM(user) {
-  const msg = document.getElementById("message");
   const para = document.createElement("p");
   para.textContent = `Error: ${user.data.msg}`;
   para.style.color = "red";

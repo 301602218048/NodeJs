@@ -3,21 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SignUp</title>
+    <title>Login</title>
   </head>
   <body>
     <div>
-      <form id="signupForm" onsubmit="handleSignUp(event)">
-        <div>
-          <label for="name">Name</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            placeholder="Enter your name"
-            required
-          />
-        </div>
+      <form id="loginForm" onsubmit="handleLogin(event)">
         <div>
           <label for="email">Email</label>
           <input
@@ -34,14 +24,14 @@
             type="password"
             name="password"
             id="password"
-            placeholder="Enter your password"
+            placeholder="Enter password"
             required
           />
         </div>
-        <button type="submit">SignUp</button>
+        <button type="submit">Login</button>
         <div id="message"></div>
       </form>
-      <a href="./login.html">Login</a>
+      <a href="./index.html">SignUp</a>
     </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
