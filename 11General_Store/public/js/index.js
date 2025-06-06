@@ -29,17 +29,17 @@ function addToDOM(item) {
   const div = document.createElement("div");
   const buyOne = document.createElement("button");
   buyOne.textContent = "Buy 1";
-  buyOne.addEventListener("click", () => buy1Item(item, span));
+  buyOne.addEventListener("click", () => buyItem(item, span, 1));
   div.appendChild(buyOne);
 
   const buy2 = document.createElement("button");
   buy2.textContent = "Buy 2";
-  buy2.addEventListener("click", () => buy2Item(item, span));
+  buy2.addEventListener("click", () => buyItem(item, span, 2));
   div.appendChild(buy2);
 
   const buy3 = document.createElement("button");
   buy3.textContent = "Buy 3";
-  buy3.addEventListener("click", () => buy3Item(item, span));
+  buy3.addEventListener("click", () => buyItem(item, span, 3));
   div.appendChild(buy3);
 
   const delete_btn = document.createElement("button");
@@ -84,46 +84,10 @@ async function deleteData(id, li) {
   }
 }
 
-async function buy1Item(itemData, span) {
+async function buyItem(itemData, span, num) {
   try {
-    if (itemData.quantity - 1 >= 0) {
-      const newQuantity = itemData.quantity - 1;
-      const newItem = { ...itemData, quantity: newQuantity };
-      const item = await axios.put(api + `/${itemData.id}`, newItem);
-      console.log(item.data);
-      const i = item.data.data;
-      itemData.quantity = i.quantity;
-      span.textContent = `${i.itemName} | ${i.description} | Rs${i.price} | ${i.quantity}`;
-    } else {
-      alert(`Can not buy ${itemData.itemName}`);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-async function buy2Item(itemData, span) {
-  try {
-    if (itemData.quantity - 2 >= 0) {
-      const newQuantity = itemData.quantity - 2;
-      const newItem = { ...itemData, quantity: newQuantity };
-      const item = await axios.put(api + `/${itemData.id}`, newItem);
-      console.log(item.data);
-      const i = item.data.data;
-      itemData.quantity = i.quantity;
-      span.textContent = `${i.itemName} | ${i.description} | Rs${i.price} | ${i.quantity}`;
-    } else {
-      alert(`Can not buy ${itemData.itemName}`);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-async function buy3Item(itemData, span) {
-  try {
-    if (itemData.quantity - 3 >= 0) {
-      const newQuantity = itemData.quantity - 3;
+    if (itemData.quantity - num >= 0) {
+      const newQuantity = itemData.quantity - num;
       const newItem = { ...itemData, quantity: newQuantity };
       const item = await axios.put(api + `/${itemData.id}`, newItem);
       console.log(item.data);
