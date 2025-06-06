@@ -30,7 +30,6 @@ async function userLogin(obj) {
     if (user) {
       alert(`${user.data.msg}`);
     }
-    console.log(user.data.data);
   } catch (error) {
     console.log(error);
     updateDOM(error.response);
@@ -40,7 +39,9 @@ async function userLogin(obj) {
 async function addData(obj) {
   try {
     const user = await axios.post(api + "/signup", obj);
-    console.log(user.data.data);
+    if (user) {
+      alert(`${user.data.msg}`);
+    }
   } catch (error) {
     console.log(error);
     updateDOM(error.response);
