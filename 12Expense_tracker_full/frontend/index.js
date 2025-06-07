@@ -27,8 +27,11 @@ function handleLogin(e) {
 async function userLogin(obj) {
   try {
     const user = await axios.post(api + "/login", obj);
-    if (user) {
+    if (user.data.success) {
       alert(`${user.data.msg}`);
+      window.location.replace(
+        window.location.origin + "/12Expense_tracker_full/frontend/expense.html"
+      );
     }
   } catch (error) {
     console.log(error);
