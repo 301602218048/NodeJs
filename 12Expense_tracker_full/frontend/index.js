@@ -27,8 +27,10 @@ function handleLogin(e) {
 async function userLogin(obj) {
   try {
     const user = await axios.post(api + "/login", obj);
+    console.log(user);
     if (user.data.success) {
       alert(`${user.data.msg}`);
+      localStorage.setItem("token", user.data.token);
       window.location.replace(
         window.location.origin + "/12Expense_tracker_full/frontend/expense.html"
       );
@@ -44,6 +46,7 @@ async function addData(obj) {
     const user = await axios.post(api + "/signup", obj);
     if (user) {
       alert(`${user.data.msg}`);
+      window.location.href = `${window.location.origin}/12Expense_tracker_full/frontend/login.html`;
     }
   } catch (error) {
     console.log(error);

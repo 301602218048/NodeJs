@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/db-connection");
 
-const Signup = sequelize.define(
-  "signup",
+const Users = sequelize.define(
+  "users",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -30,4 +30,4 @@ const Signup = sequelize.define(
   }
 );
 
-module.exports = Signup;
+module.exports = Users;

@@ -7,6 +7,7 @@ const addExpense = async (req, res) => {
       amount: amount,
       description: desc,
       category: category,
+      userId: req.user.id,
     });
     res.status(201).json({
       msg: `Amount for ${category} successfully added`,
@@ -21,7 +22,7 @@ const addExpense = async (req, res) => {
 
 const getAllExpense = async (req, res) => {
   try {
-    const expense = await Expense.findAll();
+    const expense = await Expense.findAll({ where: { userId: req.user.id } });
     if (expense.length == 0) {
       res.status(404).json({ msg: "No expense in database", success: false });
       return;

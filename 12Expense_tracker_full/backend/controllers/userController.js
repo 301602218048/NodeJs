@@ -1,10 +1,13 @@
-const Signup = require("../models/signup");
+const Users = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const addUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const e = await Signup.findOne({ where: { email: email } });
+    const e = await Users.findOne({ where: { email: email } });
     if (e) {
       return res
         .status(400)
@@ -13,7 +16,7 @@ const addUser = async (req, res) => {
     const saltRounds = 10;
     bcrypt.hash(password, saltRounds, async (err, hash) => {
       console.log(err);
-      await Signup.create({
+      await Users.create({
         name: name,
         email: email,
         password: hash,
@@ -28,7 +31,7 @@ const addUser = async (req, res) => {
 const userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const e = await Signup.findOne({ where: { email } });
+    const e = await Users.findOne({ where: { email } });
     if (!e) {
       return res.status(404).json({ msg: "User not found", success: false });
     }
@@ -38,7 +41,14 @@ const userLogin = async (req, res) => {
         .status(400)
         .json({ msg: "Password is incorrect", success: false });
     }
-    res.status(200).json({ msg: "Logged in successfully", success: true });
+    const token = jwt.sign(
+      { userId: e.id, name: e.name, email: e.email },
+      JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+    res
+      .status(200)
+      .json({ msg: "Logged in successfully", success: true, token });
   } catch (error) {
     res.status(500).json({ msg: error.message, success: false });
   }

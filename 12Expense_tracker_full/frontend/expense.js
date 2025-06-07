@@ -1,9 +1,12 @@
 const api = "http://localhost:3000/expenses";
+const token = localStorage.getItem("token");
 document.addEventListener("DOMContentLoaded", initialize);
 
 async function initialize() {
   try {
-    const expense = await axios.get(api);
+    const expense = await axios.get(api, {
+      headers: { Authorization: token },
+    });
     console.log(expense.data.data);
     if (expense.data.data.length > 0) {
       expense.data.data.forEach((d) => {
@@ -48,7 +51,9 @@ function handleForm(e) {
 
 async function addData(obj) {
   try {
-    const expense = await axios.post(api, obj);
+    const expense = await axios.post(api, obj, {
+      headers: { Authorization: token },
+    });
     console.log(expense.data.data);
     addToDOM(expense.data.data);
   } catch (error) {
@@ -58,7 +63,7 @@ async function addData(obj) {
 
 async function deleteData(id, item) {
   try {
-    const expense = await axios.delete(`http://localhost:3000/expenses/${id}`);
+    const expense = await axios.delete(`${api}/${id}`);
     console.log(expense.data);
     item.remove();
   } catch (error) {
