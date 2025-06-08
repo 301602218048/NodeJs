@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get("/", userAuth.authenticate, expenseController.getAllExpense);
 router.post("/", userAuth.authenticate, expenseController.addExpense);
-router.delete("/:id", expenseController.deleteExpense);
+router.delete("/:id", userAuth.authenticate, expenseController.deleteExpense);
 
 module.exports = router;

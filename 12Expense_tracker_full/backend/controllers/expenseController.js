@@ -41,7 +41,9 @@ const getAllExpense = async (req, res) => {
 const deleteExpense = async (req, res) => {
   try {
     const id = req.params.id;
-    const expense = await Expense.destroy({ where: { id: id } });
+    const expense = await Expense.destroy({
+      where: { id: id, userId: req.user.id },
+    });
     if (!expense) {
       res.status(404).json({ msg: "expense not found", success: false });
       return;

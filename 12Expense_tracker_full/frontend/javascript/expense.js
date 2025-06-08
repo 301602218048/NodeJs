@@ -2,6 +2,35 @@ const api = "http://localhost:3000/expenses";
 const token = localStorage.getItem("token");
 document.addEventListener("DOMContentLoaded", initialize);
 
+const cashfree = Cashfree({
+  mode: "sandbox",
+});
+
+document.getElementById("premiumBtn").addEventListener("click", async () => {
+  try {
+    const response = await fetch("http://localhost:3000/pay", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create payment session");
+    }
+    const data = await response.json();
+    const paymentSessionId = data.paymentSessionId;
+
+    let checkoutOptions = {
+      paymentSessionId: paymentSessionId,
+      redirectTarget: "_blank",
+    };
+    cashfree.checkout(checkoutOptions);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 async function initialize() {
   try {
     const expense = await axios.get(api, {

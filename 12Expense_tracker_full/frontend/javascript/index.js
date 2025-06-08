@@ -31,9 +31,7 @@ async function userLogin(obj) {
     if (user.data.success) {
       alert(`${user.data.msg}`);
       localStorage.setItem("token", user.data.token);
-      window.location.replace(
-        window.location.origin + "/12Expense_tracker_full/frontend/expense.html"
-      );
+      window.location.href = `${window.location.origin}/12Expense_tracker_full/frontend/html/expense.html`;
     }
   } catch (error) {
     console.log(error);
@@ -46,7 +44,7 @@ async function addData(obj) {
     const user = await axios.post(api + "/signup", obj);
     if (user) {
       alert(`${user.data.msg}`);
-      window.location.href = `${window.location.origin}/12Expense_tracker_full/frontend/login.html`;
+      window.location.href = `${window.location.origin}/12Expense_tracker_full/frontend/html/login.html`;
     }
   } catch (error) {
     console.log(error);
