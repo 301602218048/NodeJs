@@ -3,6 +3,7 @@ const db = require("./utils/db-connection");
 const userRoutes = require("./routes/userRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const PremiumRoutes = require("./routes/premiumRoutes");
 const cors = require("cors");
 
 //models
@@ -13,6 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/user", userRoutes);
+app.use("/premium", PremiumRoutes);
 app.use("/pay", paymentRoutes);
 app.use("/expenses", expenseRoutes);
 

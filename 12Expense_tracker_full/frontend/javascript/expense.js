@@ -23,9 +23,42 @@ document.getElementById("premiumBtn").addEventListener("click", async () => {
 
     let checkoutOptions = {
       paymentSessionId: paymentSessionId,
-      redirectTarget: "_blank",
+      redirectTarget: "_modal",
     };
-    cashfree.checkout(checkoutOptions);
+    const result = await cashfree.checkout(checkoutOptions);
+    if (result.error) {
+      // This will be true whenever user clicks on close icon inside the modal or any error happens during the payment
+      console.log(
+        "User has closed the popup or there is some payment error, Check for Payment Status"
+      );
+      console.log(result.error);
+    }
+    if (result.redirect) {
+      // This will be true when the payment redirection page couldnt be opened in the same window
+      // This is an exceptional case only when the page is opened inside an inAppBrowser
+      // In this case the customer will be redirected to return url once payment is completed
+      console.log("Payment will be redirected");
+    }
+    if (result.paymentDetails) {
+      // Payment completed, now check the status from your backend
+      const response = await fetch(
+        `http://localhost:3000/pay/payment-status/${data.orderId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const statusData = await response.json();
+      alert("your payment is " + statusData.orderStatus);
+      const div = document.createElement("div");
+      div.innerHTML = `You are a premium user. <button id="leaderboard">Show Leaderboard</button>`;
+      document
+        .querySelector("body")
+        .insertBefore(div, document.querySelector("#expenses"));
+    }
   } catch (error) {
     console.log(error);
   }
@@ -36,15 +69,55 @@ async function initialize() {
     const expense = await axios.get(api, {
       headers: { Authorization: token },
     });
-    console.log(expense.data.data);
+    console.log(expense.data);
     if (expense.data.data.length > 0) {
       expense.data.data.forEach((d) => {
         addToDOM(d);
       });
     }
+    if (expense.data.premium) {
+      const div = document.createElement("div");
+      div.innerHTML = `You are a premium user. <button id="leaderboard">Show Leaderboard</button>`;
+      document
+        .querySelector("body")
+        .insertBefore(div, document.querySelector("#expenses"));
+      document
+        .querySelector("#leaderboard")
+        .addEventListener("click", async () => {
+          try {
+            const leaderboard = await axios.get(
+              "http://localhost:3000/premium/showLeaderboard",
+              {
+                headers: {
+                  Authorization: token,
+                },
+              }
+            );
+            if (leaderboard.data.leaderboard.length > 0) {
+              const h2 = document.createElement("h2");
+              h2.textContent = "Current Leaderboard";
+              document.querySelector("body").insertBefore(h2, null);
+
+              const ul = document.createElement("ul");
+              document.querySelector("body").insertBefore(ul, null);
+              leaderboard.data.leaderboard.forEach((l) => {
+                addLeaderToDOM(l, ul);
+              });
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        });
+    }
   } catch (err) {
     console.log(err);
   }
+}
+
+function addLeaderToDOM(u, ul) {
+  const li = document.createElement("li");
+  li.textContent = u.user.name + "-" + u.totalExpense;
+  ul.appendChild(li);
 }
 
 function addToDOM(expense) {

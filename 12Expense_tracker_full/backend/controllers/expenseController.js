@@ -27,10 +27,12 @@ const getAllExpense = async (req, res) => {
       res.status(404).json({ msg: "No expense in database", success: false });
       return;
     }
+    const latestOrderStatus = req.user.orders?.[0]?.status;
     res.status(200).json({
       msg: "Here is the list of all expenses",
       success: true,
       data: expense,
+      premium: latestOrderStatus === "SUCCESS" ? true : false,
     });
   } catch (error) {
     console.log(error);

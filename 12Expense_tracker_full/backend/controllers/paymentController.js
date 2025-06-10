@@ -4,12 +4,11 @@ const Orders = require("../models/order");
 
 const initiatePayment = async (req, res) => {
   try {
-    const userId = req.user.id; // assuming user is authenticated via middleware
+    const userId = req.user.id;
     const email = req.user.email;
     const orderId = uuidv4();
-    const amount = 100.0; // fixed premium amount (₹100 for example)
+    const amount = 100.0;
 
-    // Store initial order in DB (pending)
     await Orders.create({
       orderId,
       amount,
@@ -17,7 +16,6 @@ const initiatePayment = async (req, res) => {
       userId,
     });
 
-    // Get payment session from Cashfree
     const paymentSessionId = await cashfreeService.createOrder(
       orderId,
       amount,
@@ -26,7 +24,7 @@ const initiatePayment = async (req, res) => {
       email
     );
 
-    res.status(201).json({ paymentSessionId });
+    res.status(201).json({ paymentSessionId, orderId });
   } catch (error) {
     console.error("Payment initiation failed:", error.message);
     res.status(500).json({ error: "Failed to initiate payment" });
