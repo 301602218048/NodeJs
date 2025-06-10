@@ -19,7 +19,7 @@ app.use("/pay", paymentRoutes);
 app.use("/expenses", expenseRoutes);
 
 const port = 3000;
-db.sync({ force: false })
+db.sync({ alter: false })
   .then(() => {
     app.listen(port, () => {
       console.log(`server running on http://localhost:${port}`);

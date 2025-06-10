@@ -5,17 +5,9 @@ const sequelize = require("../utils/db-connection");
 const showLeaderboard = async (req, res) => {
   try {
     const leaderboard = await Users.findAll({
-      attributes: [
-        "id",
-        "name",
-        [sequelize.fn("sum", sequelize.col("expenses.amount")), "totalExpense"],
-      ],
+      attributes: ["id", "name", "totalExpense"],
       group: ["users.id"],
       order: [["totalExpense", "DESC"]],
-      include: {
-        model: Expense,
-        attributes: [],
-      },
     });
     if (!leaderboard || leaderboard.length === 0) {
       return res.status(404).json({ msg: "Not found", success: false });
