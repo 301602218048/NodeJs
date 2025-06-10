@@ -94,12 +94,23 @@ async function initialize() {
               }
             );
             if (leaderboard.data.leaderboard.length > 0) {
-              const h2 = document.createElement("h2");
-              h2.textContent = "Current Leaderboard";
-              document.querySelector("body").insertBefore(h2, null);
+              let h2 = document.querySelector("h2#leaderboard-heading");
+              if (!h2) {
+                h2 = document.createElement("h2");
+                h2.id = "leaderboard-heading";
+                h2.textContent = "Current Leaderboard";
+                document.body.insertBefore(h2, null);
+              }
 
-              const ul = document.createElement("ul");
-              document.querySelector("body").insertBefore(ul, null);
+              let ul = document.querySelector("ul#leaderboard-list");
+              if (!ul) {
+                ul = document.createElement("ul");
+                ul.id = "leaderboard-list";
+                document.body.insertBefore(ul, null);
+              } else {
+                ul.innerHTML = "";
+              }
+
               leaderboard.data.leaderboard.forEach((l) => {
                 addLeaderToDOM(l, ul);
               });
@@ -116,7 +127,7 @@ async function initialize() {
 
 function addLeaderToDOM(u, ul) {
   const li = document.createElement("li");
-  li.textContent = u.user.name + "-" + u.totalExpense;
+  li.textContent = u.name + " - " + (u.totalExpense || 0);
   ul.appendChild(li);
 }
 
@@ -165,7 +176,9 @@ async function addData(obj) {
 
 async function deleteData(id, item) {
   try {
-    const expense = await axios.delete(`${api}/${id}`);
+    const expense = await axios.delete(`${api}/${id}`, {
+      headers: { Authorization: token },
+    });
     console.log(expense.data);
     item.remove();
   } catch (error) {
