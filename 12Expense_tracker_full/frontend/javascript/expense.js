@@ -1,4 +1,4 @@
-const api = "http://localhost:3000/expenses";
+const api = "http://localhost:3000";
 const token = localStorage.getItem("token");
 document.addEventListener("DOMContentLoaded", initialize);
 
@@ -8,7 +8,7 @@ const cashfree = Cashfree({
 
 document.getElementById("premiumBtn").addEventListener("click", async () => {
   try {
-    const response = await fetch("http://localhost:3000/pay", {
+    const response = await fetch(`${api}/pay`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,7 +42,7 @@ document.getElementById("premiumBtn").addEventListener("click", async () => {
     if (result.paymentDetails) {
       // Payment completed, now check the status from your backend
       const response = await fetch(
-        `http://localhost:3000/pay/payment-status/${data.orderId}`,
+        `${api}/pay/payment-status/${data.orderId}`,
         {
           method: "GET",
           headers: {
@@ -66,7 +66,7 @@ document.getElementById("premiumBtn").addEventListener("click", async () => {
 
 async function initialize() {
   try {
-    const expense = await axios.get(api, {
+    const expense = await axios.get(`${api}/expenses`, {
       headers: { Authorization: token },
     });
     console.log(expense.data);
@@ -86,7 +86,7 @@ async function initialize() {
         .addEventListener("click", async () => {
           try {
             const leaderboard = await axios.get(
-              "http://localhost:3000/premium/showLeaderboard",
+              `${api}/premium/showLeaderboard`,
               {
                 headers: {
                   Authorization: token,
@@ -164,7 +164,7 @@ function handleForm(e) {
 
 async function addData(obj) {
   try {
-    const expense = await axios.post(api, obj, {
+    const expense = await axios.post(`${api}/expenses`, obj, {
       headers: { Authorization: token },
     });
     console.log(expense.data.data);
@@ -176,7 +176,7 @@ async function addData(obj) {
 
 async function deleteData(id, item) {
   try {
-    const expense = await axios.delete(`${api}/${id}`, {
+    const expense = await axios.delete(`${api}/expenses/${id}`, {
       headers: { Authorization: token },
     });
     console.log(expense.data);

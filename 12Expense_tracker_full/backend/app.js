@@ -5,12 +5,15 @@ const expenseRoutes = require("./routes/expenseRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const PremiumRoutes = require("./routes/premiumRoutes");
 const passwordRoutes = require("./routes/passwordRoutes");
+const path = require("path");
 const cors = require("cors");
 
 //models
 require("./models");
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, "..", "frontend")));
 
 app.use(cors());
 app.use(express.json());
