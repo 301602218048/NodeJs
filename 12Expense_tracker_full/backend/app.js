@@ -4,6 +4,7 @@ const userRoutes = require("./routes/userRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const PremiumRoutes = require("./routes/premiumRoutes");
+const passwordRoutes = require("./routes/passwordRoutes");
 const cors = require("cors");
 
 //models
@@ -17,6 +18,7 @@ app.use("/user", userRoutes);
 app.use("/premium", PremiumRoutes);
 app.use("/pay", paymentRoutes);
 app.use("/expenses", expenseRoutes);
+app.use("/password", passwordRoutes);
 
 const port = 3000;
 db.sync({ alter: false })

@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+    <title>Reset Password</title>
   </head>
   <body>
     <div>
-      <form id="loginForm" onsubmit="handleLogin(event)">
+      <form id="resetPassForm" onsubmit="handleReset(event)">
         <div>
           <label for="email">Email</label>
           <input
@@ -18,23 +18,12 @@
             required
           />
         </div>
-        <div>
-          <label for="password">Password</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            placeholder="Enter password"
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
+        <button type="submit">Send Link</button>
         <div id="message"></div>
       </form>
-      <a href="./resetPass.html">forgot Password</a><br />
-      <a href="./index.html">SignUp</a>
+      <a href="./login.html">SignIn</a>
     </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
-  <script src="../javascript/index.js"></script>
+  <script src="../javascript/resetPass.js"></script>
 </html>
