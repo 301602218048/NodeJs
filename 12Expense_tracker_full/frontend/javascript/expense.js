@@ -114,6 +114,11 @@ async function initialize() {
               leaderboard.data.leaderboard.forEach((l) => {
                 addLeaderToDOM(l, ul);
               });
+
+              ul = document.createElement("ul");
+              ul.id = "leaderboard-tabledata";
+              document.body.insertBefore(ul, null);
+              leaderboardTableData();
             }
           } catch (error) {
             console.log(error);
@@ -183,5 +188,81 @@ async function deleteData(id, item) {
     item.remove();
   } catch (error) {
     console.log(error);
+  }
+}
+
+async function leaderboardTableData() {
+  const listboard = document.getElementById("leaderboard-tabledata");
+  const response = await axios.get("http://localhost:3000/expenses", {
+    headers: {
+      "Content-type": "application/json",
+      authorization: token,
+    },
+  });
+  let expenses = response.data.data;
+  let arr = [...expenses];
+  const d = Date.now();
+  const now = new Date(d);
+  const monthName = now.toLocaleString("default", { month: "long" });
+  const year = now.getFullYear();
+  const monthnumber = now.getMonth();
+  let cmonth = String(monthnumber + 1);
+  cmonth = "0" + cmonth;
+  // const month = arr[0].createdAt.slice(0, 10).split("-")[1];
+  arr = arr.filter(
+    (expense) => expense.createdAt.slice(0, 10).split("-")[1] === cmonth
+  );
+  let totalIncome = 0;
+  let totalExpense = 0;
+  let totalSaving = 0;
+  let listData = "";
+  listData += `<h2>${monthName} ${year}</h2>`;
+  listData += "<table>";
+  listData +=
+    "<tr><th>Date</th><th>Description</th><th>Category</th><th>Income</th><th>Expenses</th></tr>";
+  if (arr.length < 1) {
+    listData += "</table>";
+    listboard.innerHTML = listData;
+  } else {
+    arr.map((expense) => {
+      listData += '<tr class="table-item">';
+      if (expense.category === "salary") {
+        totalIncome += expense.amount * 1;
+        listData += `<th>${expense.createdAt.slice(0, 10)}</th><th>${
+          expense.description
+        }</th><th>${expense.category}</th><th>${
+          expense.amount
+        }.00</th><th>00.00</th> `;
+      } else {
+        totalExpense += expense.amount * 1;
+        listData += `<th>${expense.createdAt.slice(0, 10)}</th><th>${
+          expense.description
+        }</th><th>${expense.category}</th><th>00.00</th><th>${
+          expense.amount
+        }.00</th> `;
+      }
+      listData += "</tr>";
+    });
+    totalSaving = totalIncome - totalExpense;
+    listData += `<tr><th></th><th></th><th></th><th>${totalIncome}.00</th><th>${totalExpense}.00</th></tr>`;
+    listData += `<tr><th></th><th></th><th></th><th style= "color : green ; width:80px">Rs ${totalIncome}.00</th><th style= "color : red ; width:60px">Rs ${totalExpense}</th></tr>`;
+    listData += `<table style = "width: 80%;"><tr><th style= "color : blue; text-align: right; ">Total Saving :- Rs ${totalSaving}.00</th></tr></table>`;
+    listData += "</table>";
+    // mothly table
+    listData += "<h3>Yearly Report</h3>";
+    listData += "<table>";
+    listData +=
+      "<tr><th>Month</th><th>Income</th><th>Expense</th><th>Saving</th></tr>";
+    listData += `<tr><th>${monthName}</th><th> ${totalIncome}.00</th><th>${totalExpense}.00</th><th> ${totalSaving}.00</th></tr>`;
+    listData += `<tr><th></th><th style= "color : green">Rs ${totalIncome}.00</th><th style= "color : red">Rs ${totalExpense}.00</th><th style= "color : blue">Rs ${totalSaving}.00</th></tr>`;
+    listData += "</table>";
+    // notes table
+    listData += `<h3>Notes Report ${year}</h3>`;
+    listData += "<table>";
+    listData += "<tr><th>Date</th><th>Notes</th></tr>";
+    listData += "<tr><th>02-04-2023</th><th>have to go to doctor</th></tr>";
+    listData += "<tr><th>06-04-2023</th><th>meet at sharpner </th></tr>";
+    listData += "</table>";
+    listboard.innerHTML = listData;
   }
 }

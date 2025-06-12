@@ -24,7 +24,7 @@ app.use("/expenses", expenseRoutes);
 app.use("/password", passwordRoutes);
 
 const port = 3000;
-db.sync({ alter: false })
+db.sync({ alter: true })
   .then(() => {
     app.listen(port, () => {
       console.log(`server running on http://localhost:${port}`);
