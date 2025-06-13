@@ -5,9 +5,7 @@ const pagination = document.getElementById("pagination");
 const rowperPage = document.getElementById("pages");
 
 const token = localStorage.getItem("token");
-let currentPage = localStorage.getItem("currentPage")
-  ? parseInt(localStorage.getItem("currentPage"))
-  : 1;
+let currentPage;
 
 if (!localStorage.getItem("rowperPage")) {
   localStorage.setItem("rowperPage", 2);
@@ -159,9 +157,10 @@ async function deleteData(id, item) {
     item.remove();
     currentPage = localStorage.getItem("currentPage");
     const expenseCount = document.querySelectorAll(".expense-item").length;
-    if (expenseCount == 0 && currentPage > 0) {
+    if (expenseCount === 0 && currentPage > 0) {
       getExpenses(currentPage - 1);
     }
+    getExpenses(currentPage);
   } catch (err) {
     console.error(err);
   }
