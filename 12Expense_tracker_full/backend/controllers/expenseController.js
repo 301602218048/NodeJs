@@ -58,6 +58,35 @@ const getAllExpense = async (req, res) => {
   }
 };
 
+const getPageExpense = async (req, res) => {
+  try {
+    const page = req.query.page * 1 || 1;
+    const ITEM_PER_PAGE = 2;
+    const totalCounts = await Expense.count({ where: { UserId: req.user.id } });
+    if (totalCounts === 0) {
+      return res.status(404).json({ msg: "No expense found" });
+    }
+    const expense = await Expense.findAll({
+      where: { UserId: req.user.id },
+      offset: (page - 1) * ITEM_PER_PAGE,
+      limit: ITEM_PER_PAGE,
+    });
+    res.status(200).json({
+      CURRENT_PAGE: page,
+      HAS_NEXT_PAGE: ITEM_PER_PAGE * page < totalCounts,
+      NEXT_PAGE: page + 1,
+      HAS_PREVIOUS_PAGE: page > 1,
+      PREVIOUS_PAGE: page - 1,
+      LAST_PAGE: Math.ceil(totalCounts / ITEM_PER_PAGE),
+      data: expense,
+      msg: "Here is your paged expenses",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: error.message, success: false });
+  }
+};
+
 const deleteExpense = async (req, res) => {
   const t = await sequelize.transaction();
   try {
@@ -98,4 +127,5 @@ module.exports = {
   addExpense,
   getAllExpense,
   deleteExpense,
+  getPageExpense,
 };

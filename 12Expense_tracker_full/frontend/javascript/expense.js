@@ -1,7 +1,8 @@
 const api = "http://localhost:3000";
 const token = localStorage.getItem("token");
-const premiumBtn = document.getElementById("premiumBtn");
 const cashfree = Cashfree({ mode: "sandbox" });
+const premiumBtn = document.getElementById("premiumBtn");
+const pagination = document.getElementById("pagination");
 
 document.addEventListener("DOMContentLoaded", initialize);
 
@@ -55,11 +56,7 @@ function parseJwt(token) {
 
 async function initialize() {
   try {
-    const res = await axios.get(`${api}/expenses`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    res.data.data.forEach(addToDOM);
+    await getExpenses(1);
 
     const user = parseJwt(token);
     if (user.premium) {
@@ -227,4 +224,50 @@ async function leaderboardTableData() {
   `;
 
   listboard.innerHTML = tableSection + yearlyReport + notesReport;
+}
+
+async function getExpenses(page) {
+  try {
+    const res = await axios.get(`${api}/expenses/paginate?page=${page}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const { data, ...pageData } = res.data;
+
+    const ul = document.getElementById("expense-list");
+    ul.innerHTML = "";
+
+    data.forEach(addToDOM);
+    showPagination(pageData);
+  } catch (error) {
+    console.log("Error loading expenses:", error);
+  }
+}
+
+function showPagination({
+  CURRENT_PAGE,
+  HAS_NEXT_PAGE,
+  NEXT_PAGE,
+  HAS_PREVIOUS_PAGE,
+  PREVIOUS_PAGE,
+  LAST_PAGE,
+}) {
+  pagination.innerHTML = "";
+  if (HAS_PREVIOUS_PAGE) {
+    const btn2 = document.createElement("button");
+    btn2.innerHTML = PREVIOUS_PAGE;
+    btn2.addEventListener("click", () => getExpenses(PREVIOUS_PAGE));
+    pagination.appendChild(btn2);
+  }
+  const btn3 = document.createElement("button");
+  btn3.innerHTML = CURRENT_PAGE;
+  btn3.addEventListener("click", () => getExpenses(CURRENT_PAGE));
+  pagination.appendChild(btn3);
+
+  if (HAS_NEXT_PAGE) {
+    const btn1 = document.createElement("button");
+    btn1.innerHTML = NEXT_PAGE;
+    btn1.addEventListener("click", () => getExpenses(NEXT_PAGE));
+    pagination.appendChild(btn1);
+  }
 }
