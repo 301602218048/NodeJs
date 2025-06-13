@@ -61,7 +61,8 @@ const getAllExpense = async (req, res) => {
 const getPageExpense = async (req, res) => {
   try {
     const page = req.query.page * 1 || 1;
-    const ITEM_PER_PAGE = 2;
+    const limit = req.query.limit * 1 || 1;
+    const ITEM_PER_PAGE = limit;
     const totalCounts = await Expense.count({ where: { UserId: req.user.id } });
     if (totalCounts === 0) {
       return res.status(404).json({ msg: "No expense found" });

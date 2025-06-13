@@ -1,8 +1,17 @@
 const api = "http://localhost:3000";
-const token = localStorage.getItem("token");
 const cashfree = Cashfree({ mode: "sandbox" });
 const premiumBtn = document.getElementById("premiumBtn");
 const pagination = document.getElementById("pagination");
+const rowperPage = document.getElementById("pages");
+
+const token = localStorage.getItem("token");
+let currentPage = localStorage.getItem("currentPage")
+  ? parseInt(localStorage.getItem("currentPage"))
+  : 1;
+
+if (!localStorage.getItem("rowperPage")) {
+  localStorage.setItem("rowperPage", 2);
+}
 
 document.addEventListener("DOMContentLoaded", initialize);
 
@@ -54,8 +63,16 @@ function parseJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
+rowperPage.onchange = () => {
+  currentPage = 1;
+  localStorage.setItem("rowperPage", rowperPage.value);
+  localStorage.setItem("currentPage", currentPage);
+  getExpenses(currentPage);
+};
+
 async function initialize() {
   try {
+    rowperPage.value = localStorage.getItem("rowperPage");
     await getExpenses(1);
 
     const user = parseJwt(token);
@@ -98,6 +115,7 @@ function showPremiumFeatures() {
 function addToDOM({ id, amount, category, description }) {
   const ul = document.getElementById("expense-list");
   const li = document.createElement("li");
+  li.setAttribute("class", "expense-item");
   li.textContent = `Rs ${amount} - ${category} - ${description}`;
 
   const delBtn = document.createElement("button");
@@ -123,10 +141,11 @@ function handleForm(e) {
 
 async function addData(data) {
   try {
-    const res = await axios.post(`${api}/expenses`, data, {
+    await axios.post(`${api}/expenses`, data, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    addToDOM(res.data.data);
+    currentPage = localStorage.getItem("currentPage");
+    getExpenses(currentPage);
   } catch (err) {
     console.error(err);
   }
@@ -138,6 +157,11 @@ async function deleteData(id, item) {
       headers: { Authorization: `Bearer ${token}` },
     });
     item.remove();
+    currentPage = localStorage.getItem("currentPage");
+    const expenseCount = document.querySelectorAll(".expense-item").length;
+    if (expenseCount == 0 && currentPage > 0) {
+      getExpenses(currentPage - 1);
+    }
   } catch (err) {
     console.error(err);
   }
@@ -227,10 +251,15 @@ async function leaderboardTableData() {
 }
 
 async function getExpenses(page) {
+  const limit = localStorage.getItem("rowperPage") || 2;
+  localStorage.setItem("currentPage", page);
   try {
-    const res = await axios.get(`${api}/expenses/paginate?page=${page}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await axios.get(
+      `${api}/expenses/paginate?page=${page}&limit=${limit}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     const { data, ...pageData } = res.data;
 
