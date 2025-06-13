@@ -5,13 +5,14 @@ const sequelize = require("../utils/db-connection");
 const addExpense = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const { amount, category, desc } = req.body;
+    const { amount, category, desc, note } = req.body;
     const expense = await Expense.create(
       {
         amount: parseInt(amount),
         description: desc,
         category: category,
         userId: req.user.id,
+        note: note,
       },
       { transaction: t }
     );

@@ -110,11 +110,11 @@ function showPremiumFeatures() {
   });
 }
 
-function addToDOM({ id, amount, category, description }) {
+function addToDOM({ id, amount, category, description, note }) {
   const ul = document.getElementById("expense-list");
   const li = document.createElement("li");
   li.setAttribute("class", "expense-item");
-  li.textContent = `Rs ${amount} - ${category} - ${description}`;
+  li.textContent = `Rs ${amount} - ${category} - ${description} - ${note}`;
 
   const delBtn = document.createElement("button");
   delBtn.textContent = "Delete";
@@ -132,8 +132,13 @@ function addLeaderToDOM({ name, totalExpense = 0 }, ul) {
 
 function handleForm(e) {
   e.preventDefault();
-  const { amount, category, desc } = e.target;
-  addData({ amount: amount.value, category: category.value, desc: desc.value });
+  const { amount, category, desc, note } = e.target;
+  addData({
+    amount: amount.value,
+    category: category.value,
+    desc: desc.value,
+    note: note.value,
+  });
   e.target.reset();
 }
 

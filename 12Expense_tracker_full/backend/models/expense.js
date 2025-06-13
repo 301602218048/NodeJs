@@ -22,6 +22,9 @@ const Expenses = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    note: {
+      type: DataTypes.STRING,
+    },
   },
   {
     tableName: "expenses",
