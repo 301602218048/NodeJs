@@ -1,6 +1,8 @@
 const { v4: uuidv4 } = require("uuid");
 const cashfreeService = require("../services/cashfreeService");
+const sequelize = require("../utils/db-connection");
 const Orders = require("../models/order");
+const User = require("../models/user");
 
 const initiatePayment = async (req, res) => {
   try {
@@ -32,16 +34,31 @@ const initiatePayment = async (req, res) => {
 };
 
 const getOrderStatus = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
     const orderId = req.params.orderId;
     const orderStatus = await cashfreeService.getPaymentStatus(orderId);
 
-    const order = await Orders.findOne({ where: { orderId } });
+    const order = await Orders.findOne({ where: { orderId }, transaction: t });
+    if (!order) {
+      t.rollback();
+      return res.status(404).json({ msg: "Order not found" });
+    }
     order.status = orderStatus;
-    await order.save();
+    await order.save({ transaction: t });
 
-    res.status(200).json({ order, orderStatus });
+    if (orderStatus === "Success") {
+      await User.update(
+        { isPremiumUser: true },
+        { where: { id: order.userId }, transaction: t }
+      );
+    }
+    t.commit();
+    res
+      .status(200)
+      .json({ msg: "This is your order status", order, orderStatus });
   } catch (error) {
+    await t.rollback();
     console.log("Fetching OrderStatus Failed", error.message);
     res.status(500).json({ error: "Failed to fetch order status" });
   }

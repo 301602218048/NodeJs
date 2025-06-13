@@ -1,193 +1,148 @@
 const api = "http://localhost:3000";
 const token = localStorage.getItem("token");
+const premiumBtn = document.getElementById("premiumBtn");
+const cashfree = Cashfree({ mode: "sandbox" });
+
 document.addEventListener("DOMContentLoaded", initialize);
 
-const cashfree = Cashfree({
-  mode: "sandbox",
-});
-
-document.getElementById("premiumBtn").addEventListener("click", async () => {
+premiumBtn.addEventListener("click", async () => {
   try {
     const response = await fetch(`${api}/pay`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
       },
     });
-    if (!response.ok) {
-      throw new Error("Failed to create payment session");
-    }
-    const data = await response.json();
-    const paymentSessionId = data.paymentSessionId;
 
-    let checkoutOptions = {
-      paymentSessionId: paymentSessionId,
+    if (!response.ok) throw new Error("Failed to create payment session");
+
+    const { paymentSessionId, orderId } = await response.json();
+
+    const result = await cashfree.checkout({
+      paymentSessionId,
       redirectTarget: "_modal",
-    };
-    const result = await cashfree.checkout(checkoutOptions);
-    if (result.error) {
-      // This will be true whenever user clicks on close icon inside the modal or any error happens during the payment
-      console.log(
-        "User has closed the popup or there is some payment error, Check for Payment Status"
-      );
-      console.log(result.error);
-    }
-    if (result.redirect) {
-      // This will be true when the payment redirection page couldnt be opened in the same window
-      // This is an exceptional case only when the page is opened inside an inAppBrowser
-      // In this case the customer will be redirected to return url once payment is completed
-      console.log("Payment will be redirected");
-    }
-    if (result.paymentDetails) {
-      // Payment completed, now check the status from your backend
-      const response = await fetch(
-        `${api}/pay/payment-status/${data.orderId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    });
 
-      const statusData = await response.json();
-      alert("your payment is " + statusData.orderStatus);
-      const div = document.createElement("div");
-      div.innerHTML = `You are a premium user. <button id="leaderboard">Show Leaderboard</button>`;
-      document
-        .querySelector("body")
-        .insertBefore(div, document.querySelector("#expenses"));
+    if (result.error) {
+      console.log("Payment error or popup closed:", result.error);
     }
-  } catch (error) {
-    console.log(error);
+
+    if (result.paymentDetails) {
+      const status = await axios.get(`${api}/pay/payment-status/${orderId}`);
+      alert(`Your payment is ${status.data.orderStatus}`);
+
+      if (status.data.orderStatus === "Success") {
+        showPremiumFeatures();
+        premiumBtn.disabled = true;
+      }
+    }
+  } catch (err) {
+    console.error(err);
   }
 });
 
+function parseJwt(token) {
+  const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+      .join("")
+  );
+  return JSON.parse(jsonPayload);
+}
+
 async function initialize() {
   try {
-    const expense = await axios.get(`${api}/expenses`, {
-      headers: { Authorization: token },
+    const res = await axios.get(`${api}/expenses`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    console.log(expense.data);
-    if (expense.data.data.length > 0) {
-      expense.data.data.forEach((d) => {
-        addToDOM(d);
-      });
-    }
-    if (expense.data.premium) {
-      const div = document.createElement("div");
-      div.innerHTML = `You are a premium user. <button id="leaderboard">Show Leaderboard</button>`;
-      document
-        .querySelector("body")
-        .insertBefore(div, document.querySelector("#expenses"));
-      document
-        .querySelector("#leaderboard")
-        .addEventListener("click", async () => {
-          try {
-            const leaderboard = await axios.get(
-              `${api}/premium/showLeaderboard`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-            if (leaderboard.data.leaderboard.length > 0) {
-              let h2 = document.querySelector("h2#leaderboard-heading");
-              if (!h2) {
-                h2 = document.createElement("h2");
-                h2.id = "leaderboard-heading";
-                h2.textContent = "Current Leaderboard";
-                document.body.insertBefore(h2, null);
-              }
 
-              let ul = document.querySelector("ul#leaderboard-list");
-              if (!ul) {
-                ul = document.createElement("ul");
-                ul.id = "leaderboard-list";
-                document.body.insertBefore(ul, null);
-              } else {
-                ul.innerHTML = "";
-              }
+    res.data.data.forEach(addToDOM);
 
-              leaderboard.data.leaderboard.forEach((l) => {
-                addLeaderToDOM(l, ul);
-              });
-
-              ul = document.createElement("ul");
-              ul.id = "leaderboard-tabledata";
-              document.body.insertBefore(ul, null);
-              leaderboardTableData();
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        });
+    const user = parseJwt(token);
+    if (user.premium) {
+      premiumBtn.disabled = true;
+      showPremiumFeatures();
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 
-function addLeaderToDOM(u, ul) {
+function showPremiumFeatures() {
+  const div = document.createElement("div");
+  div.innerHTML = `You are a premium user. <button id="leaderboard">Show Leaderboard</button><button id="download">Download</button>`;
+  document.body.insertBefore(div, document.getElementById("expenses"));
+
+  document.getElementById("leaderboard").addEventListener("click", async () => {
+    try {
+      const res = await axios.get(`${api}/premium/showLeaderboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const lbList = document.getElementById("lb-list");
+      const lbHeading = document.getElementById("lb-heading");
+
+      lbList.innerHTML = "";
+      lbHeading.style.display = lbList.style.display = "block";
+
+      res.data.leaderboard.forEach((user) => addLeaderToDOM(user, lbList));
+
+      document.getElementById("leaderboard-tabledata").style.display = "block";
+      leaderboardTableData();
+    } catch (err) {
+      console.error(err);
+    }
+  });
+}
+
+function addToDOM({ id, amount, category, description }) {
+  const ul = document.getElementById("expense-list");
   const li = document.createElement("li");
-  li.textContent = u.name + " - " + (u.totalExpense || 0);
+  li.textContent = `Rs ${amount} - ${category} - ${description}`;
+
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "Delete";
+  delBtn.onclick = () => deleteData(id, li);
+
+  li.appendChild(delBtn);
   ul.appendChild(li);
 }
 
-function addToDOM(expense) {
-  const ul = document.querySelector("ul");
+function addLeaderToDOM({ name, totalExpense = 0 }, ul) {
   const li = document.createElement("li");
-  li.textContent =
-    "Rs " +
-    expense.amount +
-    " - " +
-    expense.category +
-    " - " +
-    expense.description;
-
-  const delete_btn = document.createElement("button");
-  delete_btn.textContent = "Delete";
-  delete_btn.addEventListener("click", () => deleteData(expense.id, li));
-
-  li.appendChild(delete_btn);
+  li.textContent = `${name} - ${totalExpense}`;
   ul.appendChild(li);
 }
 
 function handleForm(e) {
   e.preventDefault();
-  const obj = {
-    amount: e.target.amount.value,
-    category: e.target.category.value,
-    desc: e.target.desc.value,
-  };
-
-  addData(obj);
+  const { amount, category, desc } = e.target;
+  addData({ amount: amount.value, category: category.value, desc: desc.value });
   e.target.reset();
 }
 
-async function addData(obj) {
+async function addData(data) {
   try {
-    const expense = await axios.post(`${api}/expenses`, obj, {
-      headers: { Authorization: token },
+    const res = await axios.post(`${api}/expenses`, data, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    console.log(expense.data.data);
-    addToDOM(expense.data.data);
-  } catch (error) {
-    console.log(error);
+    addToDOM(res.data.data);
+  } catch (err) {
+    console.error(err);
   }
 }
 
 async function deleteData(id, item) {
   try {
-    const expense = await axios.delete(`${api}/expenses/${id}`, {
-      headers: { Authorization: token },
+    await axios.delete(`${api}/expenses/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    console.log(expense.data);
     item.remove();
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -196,73 +151,80 @@ async function leaderboardTableData() {
   const response = await axios.get("http://localhost:3000/expenses", {
     headers: {
       "Content-type": "application/json",
-      authorization: token,
+      Authorization: `Bearer ${token}`,
     },
   });
-  let expenses = response.data.data;
-  let arr = [...expenses];
-  const d = Date.now();
-  const now = new Date(d);
+
+  const expenses = response.data.data;
+  const now = new Date();
+  const currentMonth = String(now.getMonth() + 1).padStart(2, "0");
+  const currentYear = now.getFullYear();
   const monthName = now.toLocaleString("default", { month: "long" });
-  const year = now.getFullYear();
-  const monthnumber = now.getMonth();
-  let cmonth = String(monthnumber + 1);
-  cmonth = "0" + cmonth;
-  // const month = arr[0].createdAt.slice(0, 10).split("-")[1];
-  arr = arr.filter(
-    (expense) => expense.createdAt.slice(0, 10).split("-")[1] === cmonth
-  );
-  let totalIncome = 0;
-  let totalExpense = 0;
-  let totalSaving = 0;
-  let listData = "";
-  listData += `<h2>${monthName} ${year}</h2>`;
-  listData += "<table>";
-  listData +=
-    "<tr><th>Date</th><th>Description</th><th>Category</th><th>Income</th><th>Expenses</th></tr>";
-  if (arr.length < 1) {
-    listData += "</table>";
-    listboard.innerHTML = listData;
-  } else {
-    arr.map((expense) => {
-      listData += '<tr class="table-item">';
-      if (expense.category === "salary") {
-        totalIncome += expense.amount * 1;
-        listData += `<th>${expense.createdAt.slice(0, 10)}</th><th>${
-          expense.description
-        }</th><th>${expense.category}</th><th>${
-          expense.amount
-        }.00</th><th>00.00</th> `;
-      } else {
-        totalExpense += expense.amount * 1;
-        listData += `<th>${expense.createdAt.slice(0, 10)}</th><th>${
-          expense.description
-        }</th><th>${expense.category}</th><th>00.00</th><th>${
-          expense.amount
-        }.00</th> `;
-      }
-      listData += "</tr>";
-    });
-    totalSaving = totalIncome - totalExpense;
-    listData += `<tr><th></th><th></th><th></th><th>${totalIncome}.00</th><th>${totalExpense}.00</th></tr>`;
-    listData += `<tr><th></th><th></th><th></th><th style= "color : green ; width:80px">Rs ${totalIncome}.00</th><th style= "color : red ; width:60px">Rs ${totalExpense}</th></tr>`;
-    listData += `<table style = "width: 80%;"><tr><th style= "color : blue; text-align: right; ">Total Saving :- Rs ${totalSaving}.00</th></tr></table>`;
-    listData += "</table>";
-    // mothly table
-    listData += "<h3>Yearly Report</h3>";
-    listData += "<table>";
-    listData +=
-      "<tr><th>Month</th><th>Income</th><th>Expense</th><th>Saving</th></tr>";
-    listData += `<tr><th>${monthName}</th><th> ${totalIncome}.00</th><th>${totalExpense}.00</th><th> ${totalSaving}.00</th></tr>`;
-    listData += `<tr><th></th><th style= "color : green">Rs ${totalIncome}.00</th><th style= "color : red">Rs ${totalExpense}.00</th><th style= "color : blue">Rs ${totalSaving}.00</th></tr>`;
-    listData += "</table>";
-    // notes table
-    listData += `<h3>Notes Report ${year}</h3>`;
-    listData += "<table>";
-    listData += "<tr><th>Date</th><th>Notes</th></tr>";
-    listData += "<tr><th>02-04-2023</th><th>have to go to doctor</th></tr>";
-    listData += "<tr><th>06-04-2023</th><th>meet at sharpner </th></tr>";
-    listData += "</table>";
-    listboard.innerHTML = listData;
-  }
+
+  const monthlyExpenses = expenses.filter((exp) => {
+    const [year, month] = exp.createdAt.slice(0, 10).split("-");
+    return month === currentMonth && +year === currentYear;
+  });
+
+  let income = 0,
+    expense = 0;
+  let rows = monthlyExpenses.map((exp) => {
+    const date = exp.createdAt.slice(0, 10);
+    const isIncome = exp.category === "salary";
+    const amt = +exp.amount;
+    if (isIncome) income += amt;
+    else expense += amt;
+
+    return `
+      <tr class="table-item">
+        <td>${date}</td>
+        <td>${exp.description}</td>
+        <td>${exp.category}</td>
+        <td>${isIncome ? `Rs ${amt}.00` : "00.00"}</td>
+        <td>${!isIncome ? `Rs ${amt}.00` : "00.00"}</td>
+      </tr>
+    `;
+  });
+
+  const saving = income - expense;
+
+  const tableSection = `
+    <h2>${monthName} ${currentYear}</h2>
+    <table>
+      <tr><th>Date</th><th>Description</th><th>Category</th><th>Income</th><th>Expenses</th></tr>
+      ${rows.join("")}
+      <tr><td colspan="3"></td><td><strong>Rs ${income}.00</strong></td><td><strong>Rs ${expense}.00</strong></td></tr>
+      <tr><td colspan="3"></td>
+          <td style="color: green">Rs ${income}.00</td>
+          <td style="color: red">Rs ${expense}.00</td>
+      </tr>
+    </table>
+    <table style="width: 80%;">
+      <tr><td style="color: blue; text-align: right;">Total Saving: Rs ${saving}.00</td></tr>
+    </table>
+  `;
+
+  const yearlyReport = `
+    <h3>Yearly Report</h3>
+    <table>
+      <tr><th>Month</th><th>Income</th><th>Expense</th><th>Saving</th></tr>
+      <tr>
+        <td>${monthName}</td>
+        <td style="color: green">Rs ${income}.00</td>
+        <td style="color: red">Rs ${expense}.00</td>
+        <td style="color: blue">Rs ${saving}.00</td>
+      </tr>
+    </table>
+  `;
+
+  const notesReport = `
+    <h3>Notes Report ${currentYear}</h3>
+    <table>
+      <tr><th>Date</th><th>Notes</th></tr>
+      <tr><td>02-04-2023</td><td>have to go to doctor</td></tr>
+      <tr><td>06-04-2023</td><td>meet at sharpner</td></tr>
+    </table>
+  `;
+
+  listboard.innerHTML = tableSection + yearlyReport + notesReport;
 }

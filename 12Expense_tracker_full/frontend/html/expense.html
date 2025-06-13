@@ -19,9 +19,7 @@
     >
       <h2>Expense Tracker</h2>
       <div>
-        <label for="premiumBtn" style="font-weight: bold">
-          Premium Membership:
-        </label>
+        <label for="premiumBtn"><strong>Premium Membership:</strong></label>
         <button
           id="premiumBtn"
           style="
@@ -36,6 +34,7 @@
         </button>
       </div>
     </nav>
+
     <form onsubmit="handleForm(event)">
       <label for="amount">Choose Expense Amount</label>
       <input type="number" name="amount" id="amount" min="0" required />
@@ -52,8 +51,14 @@
       </select>
       <button type="submit">Submit</button>
     </form>
+
     <h2 id="expenses">Expenses</h2>
-    <ul></ul>
+    <ul id="expense-list"></ul>
+
+    <h2 id="lb-heading" style="display: none">Current Leaderboard</h2>
+    <ul id="lb-list" style="display: none"></ul>
+    <ul id="leaderboard-tabledata" style="display: none"></ul>
+
+    <script src="../javascript/expense.js"></script>
   </body>
-  <script src="../javascript/expense.js"></script>
 </html>

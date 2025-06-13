@@ -42,7 +42,7 @@ const userLogin = async (req, res) => {
         .json({ msg: "Password is incorrect", success: false });
     }
     const token = jwt.sign(
-      { userId: e.id, name: e.name, email: e.email },
+      { userId: e.id, premium: e.isPremiumUser, email: e.email },
       JWT_SECRET,
       { expiresIn: "2h" }
     );
