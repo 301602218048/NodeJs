@@ -85,6 +85,7 @@ async function initialize() {
 
 function showPremiumFeatures() {
   const div = document.createElement("div");
+  div.setAttribute("class", "premium-text");
   div.innerHTML = `You are a premium user. <button id="leaderboard">Show Leaderboard</button><button id="download">Download</button>`;
   document.body.insertBefore(div, document.getElementById("expenses"));
 
@@ -110,11 +111,11 @@ function showPremiumFeatures() {
   });
 }
 
-function addToDOM({ id, amount, category, description, note }) {
+function addToDOM({ id, amount, category, description }) {
   const ul = document.getElementById("expense-list");
   const li = document.createElement("li");
   li.setAttribute("class", "expense-item");
-  li.textContent = `Rs ${amount} - ${category} - ${description} - ${note}`;
+  li.textContent = `Rs ${amount} - ${category} - (${description})`;
 
   const delBtn = document.createElement("button");
   delBtn.textContent = "Delete";
@@ -211,6 +212,15 @@ async function leaderboardTableData() {
     `;
   });
 
+  let note_rows = expenses.map((exp) => {
+    return exp.note
+      ? `<tr class="table-item">
+        <td>${exp.createdAt.slice(0, 10)}</td>
+        <td>${exp.note}</td>
+      </tr>`
+      : "";
+  });
+
   const saving = income - expense;
 
   const tableSection = `
@@ -219,9 +229,6 @@ async function leaderboardTableData() {
       <tr><th>Date</th><th>Description</th><th>Category</th><th>Income</th><th>Expenses</th></tr>
       ${rows.join("")}
       <tr><td colspan="3"></td><td><strong>Rs ${income}.00</strong></td><td><strong>Rs ${expense}.00</strong></td></tr>
-      <tr><td colspan="3"></td>
-          <td style="color: green">Rs ${income}.00</td>
-          <td style="color: red">Rs ${expense}.00</td>
       </tr>
     </table>
     <table style="width: 80%;">
@@ -246,8 +253,7 @@ async function leaderboardTableData() {
     <h3>Notes Report ${currentYear}</h3>
     <table>
       <tr><th>Date</th><th>Notes</th></tr>
-      <tr><td>02-04-2023</td><td>have to go to doctor</td></tr>
-      <tr><td>06-04-2023</td><td>meet at sharpner</td></tr>
+      ${note_rows.join("")}
     </table>
   `;
 

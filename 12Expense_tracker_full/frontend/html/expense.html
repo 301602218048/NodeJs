@@ -6,30 +6,14 @@
     <title>Expense Tracker</title>
     <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="../css/expense.css" />
   </head>
   <body>
-    <nav
-      style="
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        align-items: center;
-        background-color: #f0f0f0;
-      "
-    >
+    <nav>
       <h2>Expense Tracker</h2>
       <div>
         <label for="premiumBtn"><strong>Premium Membership:</strong></label>
-        <button
-          id="premiumBtn"
-          style="
-            padding: 0.5rem 1rem;
-            background-color: gold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-          "
-        >
+        <button id="premiumBtn">
           <b>Buy Now</b>
         </button>
       </div>
@@ -50,18 +34,20 @@
         <option value="other">Others</option>
       </select>
       <label for="note">Note</label>
-      <input type="text" name="note" id="note" />
+      <input type="text" name="note" id="note" placeholder="Optional" />
       <button type="submit">Submit</button>
     </form>
 
     <h2 id="expenses">Expenses</h2>
-    <label for="pages">Choose a row per page:</label>
-    <select name="pages" id="pages">
-      <option value="2">2</option>
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="20">20</option>
-    </select>
+    <div id="page-selection">
+      <label for="pages">Choose a row per page:</label>
+      <select name="pages" id="pages">
+        <option value="2">2</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+      </select>
+    </div>
     <ul id="expense-list"></ul>
     <div id="pagination" style="position: sticky"></div>
 
