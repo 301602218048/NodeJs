@@ -1,6 +1,8 @@
 const Expense = require("../models/expense");
 const User = require("../models/user");
+const Downloadfile = require("../models/downloadfile");
 const sequelize = require("../utils/db-connection");
+const s3Service = require("../services/s3Service");
 
 const addExpense = async (req, res) => {
   const t = await sequelize.transaction();
@@ -125,9 +127,46 @@ const deleteExpense = async (req, res) => {
   }
 };
 
+const fileDownload = async (req, res) => {
+  try {
+    const expense = await req.user.getExpenses();
+    const StringifyExpense = JSON.stringify(expense);
+    const userId = req.user.id;
+    const filename = `Expense-${userId}-${new Date()}.txt`;
+    const fileUrl = await s3Service.UploadToS3(StringifyExpense, filename);
+    await req.user.createDownloadfile({
+      fileUrl: fileUrl,
+    });
+    res.status(201).json({
+      fileUrl: fileUrl,
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal server error" });
+  }
+};
+
+const downloadTable = async (req, res) => {
+  try {
+    const response = await req.user.getDownloadfiles();
+    return res.status(200).json({
+      success: true,
+      data: response,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Internal server error",
+      success: false,
+    });
+  }
+};
+
 module.exports = {
   addExpense,
   getAllExpense,
   deleteExpense,
   getPageExpense,
+  fileDownload,
+  downloadTable,
 };

@@ -109,6 +109,25 @@ function showPremiumFeatures() {
       console.error(err);
     }
   });
+
+  document.getElementById("download").addEventListener("click", download);
+}
+
+async function download() {
+  try {
+    const res = await axios.get("http://localhost:3000/expenses/download", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.status === 201) {
+      const a = document.createElement("a");
+      a.href = res.data.fileUrl;
+      a.download = "myexpense.csv";
+      a.click();
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function addToDOM({ id, amount, category, description }) {
@@ -215,33 +234,55 @@ async function leaderboardTableData() {
   let note_rows = expenses.map((exp) => {
     return exp.note
       ? `<tr class="table-item">
-        <td>${exp.createdAt.slice(0, 10)}</td>
-        <td>${exp.note}</td>
+      <td>${exp.createdAt.slice(0, 10)}</td>
+      <td>${exp.note}</td>
       </tr>`
       : "";
   });
 
   const saving = income - expense;
 
+  const downloadtable = await axios.get(
+    "http://localhost:3000/expenses/downloadtable",
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  console.log(downloadtable);
+
+  const fileRows = downloadtable.data.data.length
+    ? downloadtable.data.data
+        .map(
+          (item) => `
+        <tr>
+          <td>${item.createdAt.slice(0, 10)}</td>
+          <td><a href="${item.fileUrl}" target="_blank">${item.fileUrl}</a></td>
+        </tr>
+      `
+        )
+        .join("")
+    : "<tr><td colspan='2'>No files downloaded yet.</td></tr>";
+
   const tableSection = `
     <h2>${monthName} ${currentYear}</h2>
     <table>
-      <tr><th>Date</th><th>Description</th><th>Category</th><th>Income</th><th>Expenses</th></tr>
+    <tr><th>Date</th><th>Description</th><th>Category</th><th>Income</th><th>Expenses</th></tr>
       ${rows.join("")}
       <tr><td colspan="3"></td><td><strong>Rs ${income}.00</strong></td><td><strong>Rs ${expense}.00</strong></td></tr>
       </tr>
-    </table>
-    <table style="width: 80%;">
+      </table>
+      <table style="width: 80%;">
       <tr><td style="color: blue; text-align: right;">Total Saving: Rs ${saving}.00</td></tr>
-    </table>
-  `;
+      </table>
+      `;
 
   const yearlyReport = `
     <h3>Yearly Report</h3>
     <table>
       <tr><th>Month</th><th>Income</th><th>Expense</th><th>Saving</th></tr>
       <tr>
-        <td>${monthName}</td>
+      <td>${monthName}</td>
         <td style="color: green">Rs ${income}.00</td>
         <td style="color: red">Rs ${expense}.00</td>
         <td style="color: blue">Rs ${saving}.00</td>
@@ -257,7 +298,15 @@ async function leaderboardTableData() {
     </table>
   `;
 
-  listboard.innerHTML = tableSection + yearlyReport + notesReport;
+  const fileTable = `
+    <h3>Download Files</h3>
+    <table>
+      <tr><th>Date</th><th>File URL</th></tr>
+      ${fileRows}
+    </table>
+  `;
+
+  listboard.innerHTML = tableSection + yearlyReport + notesReport + fileTable;
 }
 
 async function getExpenses(page) {
