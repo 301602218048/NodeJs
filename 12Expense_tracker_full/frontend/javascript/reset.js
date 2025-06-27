@@ -13,8 +13,8 @@ form.addEventListener("submit", async (e) => {
 
   try {
     const res = await axios.put(`${api}/password/updatepassword/${id}`, obj);
-
-    messageDiv.textContent = res.data.msg;
+    alert(`${res.data.msg}`);
+    window.location.href = `${window.location.origin}/12Expense_tracker_full/frontend/html/login.html`;
   } catch (err) {
     console.error(err);
     messageDiv.textContent = "Something went wrong. Please try again.";
