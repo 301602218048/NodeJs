@@ -8,11 +8,15 @@ const rowperPage = document.getElementById("pages");
 const token = localStorage.getItem("token");
 let currentPage;
 
+if (!localStorage.getItem("token")) {
+  window.location.href = `${window.location.origin}/12Expense_tracker_full/frontend/html/login.html`;
+} else {
+  document.addEventListener("DOMContentLoaded", initialize);
+}
+
 if (!localStorage.getItem("rowperPage")) {
   localStorage.setItem("rowperPage", 2);
 }
-
-document.addEventListener("DOMContentLoaded", initialize);
 
 premiumBtn.addEventListener("click", async () => {
   try {
@@ -71,9 +75,7 @@ rowperPage.onchange = () => {
 
 async function initialize() {
   try {
-    if (!localStorage.getItem("token")) {
-      window.location.href = `${window.location.origin}/12Expense_tracker_full/frontend/html/login.html`;
-    }
+    document.body.style.display = "block";
     rowperPage.value = localStorage.getItem("rowperPage");
     await getExpenses(1);
 
